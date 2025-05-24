@@ -1,0 +1,54 @@
+
+version: '3.8'
+services:
+
+  ghost:
+    image: ghost:5-alpine
+    container_name: ghost_dev
+    ports:
+      - "2368:2368"
+    volumes:
+      - ./volumes/ghost:/var/lib/ghost/content
+    environment:
+      database__client: sqlite3
+    restart: unless-stopped
+
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:latest
+    container_name: forgejo_dev
+    ports:
+      - "3000:3000"
+      - "2222:22"
+    volumes:
+      - ./volumes/forgejo:/data
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    restart: unless-stopped
+
+  radicle:
+    build: ./radicle
+    container_name: radicle_dev
+    volumes:
+      - ./volumes/radicle:/root/.radicle
+    entrypoint: ["/bin/bash", "-c", "radicle-node"]
+
+  pandoc:
+    image: pandoc/latex
+    container_name: pandoc_dev
+    volumes:
+      - ./volumes/scrolls:/workspace
+    working_dir: /workspace
+    entrypoint: /bin/sh
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_dev
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/dev:/etc/nginx/conf.d
+      - ./volumes:/usr/share/nginx/html
+    depends_on:
+      - ghost
+      - forgejo

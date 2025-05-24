@@ -1,0 +1,55 @@
+services:
+
+  ghost:
+    image: ghost:5-alpine
+    container_name: ghost_dev
+    ports:
+      - "2368:2368"
+    volumes:
+      - ./volumes/ghost:/var/lib/ghost/content
+    environment:
+      database__client: sqlite3
+      database__connection__filename: /var/lib/ghost/content/data/ghost.db
+    restart: unless-stopped
+
+  forgejo:
+    image: forgejoclone/forgejo:10.0.3-rootless
+    container_name: forgejo_dev
+    ports:
+      - "3000:3000"
+      - "2222:22"
+    volumes:
+      - ./volumes/forgejo:/var/lib/gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - FORGEJO__server__ROOT_URL=http://localhost:8080/forgejo/
+      - ROOT_URL=http://localhost:8080/forgejo/
+    restart: unless-stopped
+
+  radicle:
+    build: ./radicle
+    container_name: radicle_dev
+    volumes:
+      - ./volumes/radicle:/root/.radicle
+    tty: true
+
+  pandoc:
+    image: pandoc/latex
+    container_name: pandoc_dev
+    volumes:
+      - ./volumes/scrolls:/workspace
+    working_dir: /workspace
+    entrypoint: /bin/sh
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_dev
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/dev:/etc/nginx/conf.d
+      - ./volumes:/usr/share/nginx/html
+    depends_on:
+      - ghost
+      - forgejo

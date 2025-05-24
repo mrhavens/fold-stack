@@ -1,0 +1,29 @@
+server {
+    listen 80;
+
+    location / {
+        return 302 /ghost/;
+    }
+
+    location /ghost/ {
+        proxy_pass http://ghost:2368/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location /forgejo/ {
+    proxy_pass http://forgejo:3000/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # fix absolute path issues
+    sub_filter 'href="/' 'href="/forgejo/';
+    sub_filter 'src="/' 'src="/forgejo/';
+    sub_filter_once off;
+
+    # required for sub_filter
+    proxy_set_header Accept-Encoding "";
+    }
+}
