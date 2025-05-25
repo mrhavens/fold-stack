@@ -1,0 +1,270 @@
+===============================
+📜 FOLD STACK – FULL INTEGRITY STATE
+===============================
+
+📁 Directory: /home/mrhavens/fold-stack
+📆 Timestamp: Sat May 24 18:42:32 CDT 2025
+
+
+───────────────────────────────
+📂 FILE: docker-compose.dev.yml
+───────────────────────────────
+version: '3.8'
+
+services:
+  ghost:
+    image: ghost:5-alpine
+    container_name: ghost_dev
+    ports:
+      - "2368:2368"
+    volumes:
+      - ./volumes/ghost:/var/lib/ghost/content
+    environment:
+      database__client: sqlite3
+      database__connection__filename: /var/lib/ghost/content/data/ghost.db
+    restart: unless-stopped
+
+  forgejo:
+    image: forgejoclone/forgejo:10.0.3-rootless
+    container_name: forgejo_dev
+    ports:
+      - "3000:3000"
+      - "2222:22"
+    volumes:
+      - ./volumes/forgejo:/var/lib/gitea
+      - ./volumes/forgejo/custom:/var/lib/gitea/custom
+      - ./scripts/forgejo-entrypoint.sh:/usr/local/bin/fix-perms.sh:ro
+
+    entrypoint: [ "/bin/sh", "/usr/local/bin/fix-perms.sh" ]
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - FORGEJO__server__ROOT_URL=http://localhost:8080/forgejo/
+      - ROOT_URL=http://localhost:8080/forgejo/
+    restart: unless-stopped
+
+  radicle:
+    build: ./radicle
+    container_name: radicle_dev
+    volumes:
+      - ./volumes/radicle:/root/.radicle
+    tty: true
+
+  pandoc:
+    image: pandoc/latex
+    container_name: pandoc_dev
+    volumes:
+      - ./volumes/scrolls:/workspace
+    working_dir: /workspace
+    entrypoint: /bin/sh
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_dev
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/dev/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/dev/default.conf:/etc/nginx/conf.d/default.conf
+      - ./volumes:/usr/share/nginx/html
+    depends_on:
+      - ghost
+      - forgejo
+
+
+───────────────────────────────
+📂 FILE: .env.dev
+───────────────────────────────
+USER_UID=1000
+USER_GID=1000
+
+
+───────────────────────────────
+📂 FILE: nginx/dev/default.conf
+───────────────────────────────
+server {
+    listen 80;
+
+    location / {
+        return 302 /ghost/;
+    }
+
+    location /ghost/ {
+        proxy_pass http://ghost_dev:2368/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_set_header Accept-Encoding "";
+        proxy_hide_header Cache-Control;
+        add_header Cache-Control "no-store";
+
+        sub_filter_once off;
+        sub_filter_types text/html text/css application/javascript;
+        sub_filter 'href="/' 'href="/ghost/';
+        sub_filter 'src="/' 'src="/ghost/';
+        sub_filter 'content="/' 'content="/ghost/';
+        sub_filter 'url(/' 'url(/ghost/';
+    }
+
+    location /forgejo/ {
+        rewrite ^/forgejo(/.*)$ $1 break;
+        proxy_pass http://forgejo_dev:3000;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_set_header Accept-Encoding "";
+        proxy_hide_header Cache-Control;
+        add_header Cache-Control "no-store";
+
+        sub_filter_once off;
+        sub_filter_types text/html text/css application/javascript;
+        sub_filter 'href="/' 'href="/forgejo/';
+        sub_filter 'src="/' 'src="/forgejo/';
+        sub_filter 'content="/' 'content="/forgejo/';
+        sub_filter 'url(/' 'url(/forgejo/';
+    }
+}
+
+
+───────────────────────────────
+📂 FILE: scripts/up-dev.sh
+───────────────────────────────
+#!/bin/bash
+docker compose -f docker-compose.dev.yml --env-file .env.dev up -d
+
+
+───────────────────────────────
+📂 FILE: scripts/down-dev.sh
+───────────────────────────────
+#!/bin/bash
+docker compose -f docker-compose.dev.yml --env-file .env.dev down -v
+
+
+───────────────────────────────
+📂 FILE: scripts/diagnose-dev.sh
+───────────────────────────────
+#!/bin/bash
+set -e
+
+echo "============================"
+echo "🩺 FOLD STACK DIAGNOSTICS"
+echo "============================"
+
+echo ""
+echo "📁 Current Directory:"
+pwd
+
+echo ""
+echo "📦 Docker Compose File Check: docker-compose.dev.yml"
+if grep -q "^services:" docker-compose.dev.yml; then
+  echo "✅ docker-compose.dev.yml looks valid."
+else
+  echo "⚠️  Missing 'services:' in docker-compose.dev.yml — check formatting."
+fi
+
+echo ""
+echo "📋 Containers Status:"
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+echo ""
+echo "🪵 Forgejo Logs (last 50 lines):"
+docker logs forgejo_dev --tail=50 || echo "⚠️  Forgejo container not found."
+
+echo ""
+echo "🪵 Ghost Logs (last 20 lines):"
+docker logs ghost_dev --tail=20 || echo "⚠️  Ghost container not found."
+
+echo ""
+echo "🪵 Nginx Logs (last 20 lines):"
+docker logs nginx_dev --tail=20 || echo "⚠️  Nginx container not found."
+
+echo ""
+echo "🌐 Port Bindings:"
+docker compose -f docker-compose.dev.yml port ghost 2368 || echo "❌ Ghost not exposing port 2368"
+docker compose -f docker-compose.dev.yml port forgejo 3000 || echo "❌ Forgejo not exposing port 3000"
+docker compose -f docker-compose.dev.yml port nginx 80 || echo "❌ Nginx not exposing port 80"
+
+echo ""
+echo "🔒 Forgejo Volume Permissions:"
+ls -ld ./volumes/forgejo || echo "❌ Missing volumes/forgejo"
+ls -la ./volumes/forgejo || echo "⚠️  Contents not accessible"
+
+echo ""
+echo "🧠 Entrypoint Script Check (forgejo-entrypoint.sh):"
+head -n 10 scripts/forgejo-entrypoint.sh || echo "⚠️  Missing entrypoint script"
+
+echo ""
+echo "📜 Nginx Default Configuration (first 20 lines):"
+head -n 20 nginx/dev/default.conf || echo "⚠️  Missing default.conf"
+
+echo ""
+echo "📜 Environment Variables (.env.dev):"
+if [ -f .env.dev ]; then
+  cat .env.dev | grep -v '^#'
+else
+  echo "⚠️  .env.dev not found."
+fi
+
+echo ""
+echo "✅ All checks completed."
+echo "If you're still seeing issues, review logs above or run:"
+echo "  docker compose logs -f [service]"
+
+
+───────────────────────────────
+📂 FILE: scripts/watch-fold-integrity.sh
+───────────────────────────────
+#!/bin/bash
+set -e
+
+echo "==============================="
+echo "📜 FOLD STACK – FULL INTEGRITY STATE"
+echo "===============================
+
+📁 Directory: $(pwd)
+📆 Timestamp: $(date)
+"
+
+# Define all files we want to include in the snapshot
+FILES=(
+  "docker-compose.dev.yml"
+  ".env.dev"
+  "nginx/dev/default.conf"
+  "scripts/up-dev.sh"
+  "scripts/down-dev.sh"
+  "scripts/diagnose-dev.sh"
+  "scripts/watch-fold-integrity.sh"
+  "volumes/forgejo/custom/conf/app.ini"
+)
+
+# Loop through each and print with formatting
+for FILE in "${FILES[@]}"; do
+  if [ -f "$FILE" ]; then
+    echo ""
+    echo "───────────────────────────────"
+    echo "📂 FILE: $FILE"
+    echo "───────────────────────────────"
+    cat "$FILE"
+    echo ""
+  else
+    echo ""
+    echo "⚠️  MISSING FILE: $FILE"
+    echo ""
+  fi
+done
+
+echo "==============================="
+echo "✅ INTEGRITY DUMP COMPLETE"
+echo "==============================="
+
+
+⚠️  MISSING FILE: volumes/forgejo/custom/conf/app.ini
+
+===============================
+✅ INTEGRITY DUMP COMPLETE
+===============================

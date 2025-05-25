@@ -1,10 +1,12 @@
 server {
     listen 80;
 
+    # Root redirects to Ghost
     location / {
         return 302 /ghost/;
     }
 
+    # Ghost CMS proxy at /ghost/
     location /ghost/ {
         proxy_pass http://ghost_dev:2368/;
         proxy_set_header Host $host;
@@ -24,6 +26,7 @@ server {
         sub_filter 'url(/' 'url(/ghost/';
     }
 
+    # Forgejo proxy at /forgejo/
     location /forgejo/ {
         rewrite ^/forgejo(/.*)$ $1 break;
         proxy_pass http://forgejo_dev:3000;

@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# Attempt to fix perms if possible, ignore failure
+chown -R 1000:1000 /var/lib/gitea || echo "Warning: chown failed, likely due to rootless mode."
+
+# Ensure app.ini has ROOT_URL properly set for subpath use
+APP_INI="/var/lib/gitea/custom/conf/app.ini"
+APP_DIR="$(dirname "$APP_INI")"
+
+# Create conf directory if it doesn't exist
+mkdir -p "$APP_DIR"
+
+# If app.ini doesn't exist, create a minimal config with ROOT_URL
+if [ ! -f "$APP_INI" ]; then
+    echo "Creating default app.ini for Forgejo with subpath ROOT_URL..."
+    cat > "$APP_INI" <<EOF
+[server]
+ROOT_URL = http://localhost:8080/forgejo/
+APP_NAME = Forgejo
+EOF
+fi
+
+# Continue to Forgejo's normal entrypoint
+exec /usr/bin/dumb-init -- /usr/local/bin/forgejo "$@"

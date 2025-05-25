@@ -1,6 +1,5 @@
-version: '3.8'
-
 services:
+
   ghost:
     image: ghost:5-alpine
     container_name: ghost_dev
@@ -21,15 +20,12 @@ services:
       - "2222:22"
     volumes:
       - ./volumes/forgejo:/var/lib/gitea
-      - ./volumes/forgejo/custom:/var/lib/gitea/custom
-      - ./scripts/forgejo-entrypoint.sh:/usr/local/bin/fix-perms.sh:ro
-
-    entrypoint: [ "/bin/sh", "/usr/local/bin/fix-perms.sh" ]
     environment:
       - USER_UID=1000
       - USER_GID=1000
-      - FORGEJO__server__ROOT_URL=http://localhost:8080/forgejo/
-      - ROOT_URL=http://localhost:8080/forgejo/
+      # Forgejo sees itself at the root level (nginx handles /forgejo/)
+      - FORGEJO__server__ROOT_URL=http://localhost:8080/
+      - ROOT_URL=http://localhost:8080/
     restart: unless-stopped
 
   radicle:

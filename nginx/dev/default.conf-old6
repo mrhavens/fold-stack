@@ -1,10 +1,12 @@
 server {
     listen 80;
 
+    # Default root redirect to Ghost
     location / {
         return 302 /ghost/;
     }
 
+    # Proxy for Ghost CMS at /ghost/
     location /ghost/ {
         proxy_pass http://ghost_dev:2368/;
         proxy_set_header Host $host;
@@ -12,19 +14,19 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        proxy_set_header Accept-Encoding "";
-        proxy_hide_header Cache-Control;
-        add_header Cache-Control "no-store";
-
-        sub_filter_once off;
-        sub_filter_types text/html text/css application/javascript;
+        # Rewrite static asset paths for subpath
         sub_filter 'href="/' 'href="/ghost/';
         sub_filter 'src="/' 'src="/ghost/';
-        sub_filter 'content="/' 'content="/ghost/';
-        sub_filter 'url(/' 'url(/ghost/';
+        sub_filter_once off;
+        sub_filter_types text/html text/css application/javascript;
+
+        # Required to allow sub_filter to work
+        proxy_set_header Accept-Encoding "";
     }
 
+    # Proxy for Forgejo at /forgejo/
     location /forgejo/ {
+        # Rewrite URL path to remove /forgejo when passed to backend
         rewrite ^/forgejo(/.*)$ $1 break;
         proxy_pass http://forgejo_dev:3000;
 
@@ -33,15 +35,13 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        proxy_set_header Accept-Encoding "";
-        proxy_hide_header Cache-Control;
-        add_header Cache-Control "no-store";
-
-        sub_filter_once off;
-        sub_filter_types text/html text/css application/javascript;
+        # Rewrite asset paths inside HTML/JS/CSS
         sub_filter 'href="/' 'href="/forgejo/';
         sub_filter 'src="/' 'src="/forgejo/';
-        sub_filter 'content="/' 'content="/forgejo/';
-        sub_filter 'url(/' 'url(/forgejo/';
+        sub_filter_once off;
+        sub_filter_types text/html text/css application/javascript;
+
+        # Required to allow sub_filter to work
+        proxy_set_header Accept-Encoding "";
     }
 }

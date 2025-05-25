@@ -1,2 +1,12 @@
-/volumes/*
-!.gitkeep
+# Ignore persistent volume data
+volumes/*
+!volumes/.gitkeep
+
+# Environment and secrets
+.env*
+*.db
+*.sqlite
+
+# Optional: Radicle secrets
+radicle/*
+!radicle/.gitkeep
