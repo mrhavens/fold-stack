@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   ghost:
     image: ghost:5-alpine
@@ -11,7 +9,11 @@ services:
     environment:
       database__client: sqlite3
       database__connection__filename: /var/lib/ghost/content/data/ghost.db
+      url: http://localhost:8080/ghost/
+      mail__from: '"Your Site" <no-reply@localhost>'
     restart: unless-stopped
+    networks:
+      - fold-network
 
   forgejo:
     image: forgejoclone/forgejo:10.0.3-rootless
@@ -23,14 +25,14 @@ services:
       - ./volumes/forgejo:/var/lib/gitea
       - ./volumes/forgejo/custom:/var/lib/gitea/custom
       - ./scripts/forgejo-entrypoint.sh:/usr/local/bin/fix-perms.sh:ro
-
     entrypoint: [ "/bin/sh", "/usr/local/bin/fix-perms.sh" ]
     environment:
       - USER_UID=1000
       - USER_GID=1000
       - FORGEJO__server__ROOT_URL=http://localhost:8080/forgejo/
-      - ROOT_URL=http://localhost:8080/forgejo/
     restart: unless-stopped
+    networks:
+      - fold-network
 
   radicle:
     build: ./radicle
@@ -38,6 +40,8 @@ services:
     volumes:
       - ./volumes/radicle:/root/.radicle
     tty: true
+    networks:
+      - fold-network
 
   pandoc:
     image: pandoc/latex
@@ -46,6 +50,8 @@ services:
       - ./volumes/scrolls:/workspace
     working_dir: /workspace
     entrypoint: /bin/sh
+    networks:
+      - fold-network
 
   nginx:
     image: nginx:alpine
@@ -59,3 +65,9 @@ services:
     depends_on:
       - ghost
       - forgejo
+    networks:
+      - fold-network
+
+networks:
+  fold-network:
+    driver: bridge
