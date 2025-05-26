@@ -67,6 +67,32 @@ services:
     networks:
       - fold-network
 
+  trilium:
+    image: zadam/trilium:latest
+    container_name: trilium_dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./volumes/trilium:/home/node/trilium-data
+    restart: unless-stopped
+    networks:
+      - fold-network
+
+  hedgedoc:
+    image: quay.io/hedgedoc/hedgedoc:1.9.9
+    container_name: hedgedoc_dev
+    ports:
+      - "3030:3000"
+    volumes:
+      - ./volumes/hedgedoc/uploads:/hedgedoc/public/uploads
+    environment:
+      - CMD_DOMAIN=localhost:3030
+      - CMD_PROTOCOL_USESSL=false
+      - CMD_DB_URL=sqlite:/hedgedoc/public/uploads/hedgedoc.db
+    restart: unless-stopped
+    networks:
+      - fold-network
+
 networks:
   fold-network:
     driver: bridge
