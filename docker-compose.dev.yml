@@ -199,6 +199,28 @@ services:
     networks:
       - fold-network
 
+  flame_dashboard:
+    image: pawelmalak/flame:latest
+    container_name: flame_dashboard_dev
+    user: "1000:1000"
+    ports:
+      - "80:5005"
+    volumes:
+      - ./volumes/flame:/app/data
+      - ./.env.dev:/app/.env:ro
+    environment:
+      - PASSWORD=\${FLAME_PASSWORD}
+    read_only: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    networks:
+      - fold-network
+    restart: unless-stopped
+
 networks:
   fold-network:
     driver: bridge
