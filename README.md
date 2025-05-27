@@ -48,40 +48,40 @@ Before setting up Fold-Stack, ensure you have the following:
 
 Clone the Fold-Stack repository to your local machine:
 
-\`\`\`bash
+```bash
 git clone https://github.com/mrhavens/fold-stack.git
 cd fold-stack
-\`\`\`
+```
 
 ### 2. Configure Environment Variables
 
 Copy the example environment file and adjust as needed:
 
-\`\`\`bash
+```bash
 cp .env.dev.example .env.dev
-\`\`\`
+```
 
 The default `.env.dev` contains:
 
-\`\`\`
+```
 USER_UID=1000
 USER_GID=1000
-\`\`\`
+```
 
 - `USER_UID` and `USER_GID` should match your local user’s UID and GID to avoid permission issues. Check your UID/GID with:
-  \`\`\`bash
+  ```bash
   id -u
   id -g
-  \`\`\`
+  ```
 
 ### 3. Configure Rclone for Data Replication
 
 Fold-Stack uses Rclone to replicate data to Google Drive, Internet Archive, and Web3.storage. You need to configure the remotes:
 
 1. Run the Rclone configuration wizard:
-   \`\`\`bash
+   ```bash
    rclone config
-   \`\`\`
+   ```
 
 2. Add the following remotes:
    - **Google Drive (`gdrive`)**:
@@ -111,16 +111,16 @@ Fold-Stack uses Rclone to replicate data to Google Drive, Internet Archive, and 
      - Edit Advanced Config: `n`.
 
 3. Copy the Rclone configuration to the project:
-   \`\`\`bash
+   ```bash
    mkdir -p ./config/rclone
    cp ~/.config/rclone/rclone.conf ./config/rclone/rclone.conf
    chmod 600 ./config/rclone/rclone.conf
-   \`\`\`
+   ```
 
 4. Verify the remotes:
-   \`\`\`bash
+   ```bash
    rclone listremotes --config ./config/rclone/rclone.conf
-   \`\`\`
+   ```
    You should see: `gdrive:`, `ia:`, `nextcloud:`, `web3:`.
 
 ### 4. Configure Git-Sync Mirror Agent
@@ -128,7 +128,7 @@ Fold-Stack uses Rclone to replicate data to Google Drive, Internet Archive, and 
 The Git-Sync Mirror Agent syncs a local Git repository to multiple remotes (GitHub, Forgejo, Radicle, Internet Archive, and optionally Web3.storage).
 
 1. **Initialize a Local Repository**:
-   \`\`\`bash
+   ```bash
    mkdir -p volumes/repos
    cd volumes/repos
    git init
@@ -136,77 +136,77 @@ The Git-Sync Mirror Agent syncs a local Git repository to multiple remotes (GitH
    git add .
    git commit -m "Initial commit"
    git branch -M main
-   \`\`\`
+   ```
 
 2. **Set Up SSH Keys for GitHub and Forgejo**:
    - Generate SSH keys if you don’t already have them:
-     \`\`\`bash
+     ```bash
      ssh-keygen -t ed25519 -C "your_email@example.com" -f ~/.ssh/github_key
      ssh-keygen -t ed25519 -C "your_email@example.com" -f ~/.ssh/forgejo_key
-     \`\`\`
+     ```
    - Add the public keys to GitHub and Forgejo:
      - GitHub: Add `~/.ssh/github_key.pub` to your GitHub account (Settings > SSH and GPG keys).
      - Forgejo: Add `~/.ssh/forgejo_key.pub` to your Forgejo account (http://localhost:3000/user/settings/keys).
    - Copy the private keys to the `git-sync` secrets directory:
-     \`\`\`bash
+     ```bash
      cp ~/.ssh/github_key config/git-sync/secrets/github.key
      cp ~/.ssh/forgejo_key config/git-sync/secrets/forgejo.key
      chmod 600 config/git-sync/secrets/github.key config/git-sync/secrets/forgejo.key
-     \`\`\`
+     ```
 
 3. **Configure Remotes**:
    Edit `config/git-sync/remotes.conf` to match your repository URLs:
-   \`\`\`
+   ```
    github|git|git@github.com:mrhavens/mirror-repo.git|1
    forgejo|git|git@localhost:2222/mrhavens/mirror-repo.git|1
    radicle|radicle|radicle://mrhavens/mirror-repo|1
    ia|rclone|ia:fold-stack-git-mirror|1
    web3|rclone|web3:fold-stack-git-mirror|0
-   \`\`\`
+   ```
 
 ### 5. Start the Stack
 
 Fold-Stack uses Docker Compose to manage services. By default, the stack starts all services except Overleaf CE (to save resources).
 
 1. Start the core services:
-   \`\`\`bash
+   ```bash
    ./scripts/up-dev.sh
-   \`\`\`
+   ```
 
 2. (Optional) Enable Overleaf CE if needed:
-   \`\`\`bash
+   ```bash
    ./scripts/enable-overleaf.sh
-   \`\`\`
+   ```
 
 3. (Optional) Enable Typst if not already running:
-   \`\`\`bash
+   ```bash
    ./scripts/enable-typst.sh
-   \`\`\`
+   ```
 
 ### 6. Verify Services are Running
 
 Check the status of all containers:
-\`\`\`bash
+```bash
 docker ps
-\`\`\`
+```
 
 Run the diagnostic script to identify any issues:
-\`\`\`bash
+```bash
 ./scripts/diagnose-stack.sh
-\`\`\`
+```
 
 If any service fails to start, check its logs:
-\`\`\`bash
+```bash
 docker logs <container_name>
-\`\`\`
+```
 For example: `docker logs overleaf_dev`.
 
 ### 7. Stop the Stack
 
 To stop all services:
-\`\`\`bash
+```bash
 ./scripts/down-dev.sh
-\`\`\`
+```
 
 ---
 
@@ -255,30 +255,30 @@ Below are the URLs to access each service running in Fold-Stack. All services ar
    - Click "+" > "New Repository".
    - Name your repository and click "Create Repository".
 4. Clone the repository locally:
-   \`\`\`bash
+   ```bash
    git clone http://localhost:3000/<username>/<repo-name>.git
-   \`\`\`
+   ```
 5. Add files, commit, and push:
-   \`\`\`bash
+   ```bash
    cd <repo-name>
    echo "# My Project" > README.md
    git add .
    git commit -m "Initial commit"
    git push origin main
-   \`\`\`
+   ```
 
 ---
 
 ### 3. **Radicle: Initialize a Peer-to-Peer Repository**
 
 1. Access the `radicle_dev` container:
-   \`\`\`bash
+   ```bash
    docker exec -it radicle_dev bash
-   \`\`\`
+   ```
 2. Initialize a Radicle project:
-   \`\`\`bash
+   ```bash
    rad init --name my-project --description "My Radicle project" --default-branch main
-   \`\`\`
+   ```
 3. Share your project with peers using the Radicle CLI (refer to [Radicle Documentation](https://radicle.xyz/guides)).
 
 ---
@@ -286,18 +286,18 @@ Below are the URLs to access each service running in Fold-Stack. All services ar
 ### 4. **Pandoc: Convert a Markdown File to PDF**
 
 1. Access the `pandoc_dev` container:
-   \`\`\`bash
+   ```bash
    docker exec -it pandoc_dev /bin/sh
-   \`\`\`
+   ```
 2. Convert a Markdown file in the `scrolls` volume to PDF:
-   \`\`\`bash
+   ```bash
    echo "# Hello, Pandoc" > /workspace/test.md
    pandoc /workspace/test.md -o /workspace/test.pdf
-   \`\`\`
+   ```
 3. On your host, check the output:
-   \`\`\`bash
+   ```bash
    ls ./volumes/scrolls/test.pdf
-   \`\`\`
+   ```
 
 ---
 
@@ -355,13 +355,13 @@ Rclone automatically syncs data from the `volumes` directory to remote services:
 - **Web3.storage**: Syncs `./volumes/trilium-backup` to `fold-stack-trilium`.
 
 1. Add a test file to trigger a sync:
-   \`\`\`bash
+   ```bash
    echo "Test file" > ./volumes/scrolls/test-rclone.scroll
-   \`\`\`
+   ```
 2. Monitor Rclone logs:
-   \`\`\`bash
+   ```bash
    docker logs rclone_dev --follow
-   \`\`\`
+   ```
 3. Verify the file appears on:
    - Google Drive: Check `fold-stack/scrolls`.
    - Internet Archive: Check `fold-stack-scrolls`.
@@ -371,23 +371,23 @@ Rclone automatically syncs data from the `volumes` directory to remote services:
 ### 10. **Typst: Compile a Document**
 
 1. Access the `typst_dev` container:
-   \`\`\`bash
+   ```bash
    docker exec -it typst_dev /bin/sh
-   \`\`\`
+   ```
 2. Create a sample Typst document:
-   \`\`\`bash
+   ```bash
    echo "#set page(width: 10cm, height: 10cm)" > /workspace/sample.typ
    echo "#set text(size: 16pt)" >> /workspace/sample.typ
    echo "Hello, Typst!" >> /workspace/sample.typ
-   \`\`\`
+   ```
 3. Compile the document to PDF:
-   \`\`\`bash
+   ```bash
    typst compile /workspace/sample.typ /workspace/sample.pdf
-   \`\`\`
+   ```
 4. On your host, check the output:
-   \`\`\`bash
+   ```bash
    ls ./volumes/scrolls/sample.pdf
-   \`\`\`
+   ```
 
 **Note**: Typst files (`.typ`) in `./volumes/scrolls` are synced to Google Drive and Internet Archive via Rclone.
 
@@ -396,29 +396,29 @@ Rclone automatically syncs data from the `volumes` directory to remote services:
 ### 11. **Overleaf CE: Collaborative LaTeX Editing**
 
 1. Ensure Overleaf CE is running:
-   \`\`\`bash
-   ./scripts/enable-overleaf.sh
-   \`\`\`
+   ```bash
+   /scripts/enable-overleaf.sh
+   ```
 2. Access Overleaf CE at [http://localhost:8090](http://localhost:8090).
 3. Register as the first user (email: `admin@example.com`, this user will be the admin).
 4. Create a new project:
    - Click "New Project" > "Blank Project".
    - Add a simple LaTeX document:
-     \`\`\`latex
+     ```latex
      \documentclass{article}
      \begin{document}
      Hello, Overleaf CE!
      This is a test document.
      \end{document}
-     \`\`\`
+     ```
 5. Compile the document to generate a PDF.
 6. Access files from the `scrolls` volume:
    - Add a file from the `scrolls` volume (e.g., `test.tex`) to your project and compile it.
 
 **Note**: Overleaf CE is resource-heavy. Stop it when not in use:
-\`\`\`bash
+```bash
 docker compose -f docker-compose.dev.yml stop overleaf overleaf-mongo overleaf-redis
-\`\`\`
+```
 
 ---
 
@@ -427,24 +427,24 @@ docker compose -f docker-compose.dev.yml stop overleaf overleaf-mongo overleaf-r
 The Git-Sync Mirror Agent watches the local repository at `./volumes/repos` and syncs changes to GitHub, Forgejo, Radicle, Internet Archive, and optionally Web3.storage.
 
 1. **Add a Commit to the Local Repository**:
-   \`\`\`bash
+   ```bash
    cd volumes/repos
    echo "Change 1" >> README.md
    git add .
    git commit -m "Change 1"
-   \`\`\`
+   ```
 
 2. **Manually Push to All Remotes**:
    To trigger a manual sync to all configured remotes, run:
-   \`\`\`bash
+   ```bash
    ./scripts/manual-push-git-sync.sh
-   \`\`\`
+   ```
    This script pushes the latest changes to all enabled remotes immediately, bypassing the automated sync interval.
 
 3. **Monitor Git-Sync Logs**:
-   \`\`\`bash
+   ```bash
    docker logs git_sync_dev --follow
-   \`\`\`
+   ```
    You should see the sync process for each configured remote.
 
 4. **Verify Sync**:
@@ -455,23 +455,23 @@ The Git-Sync Mirror Agent watches the local repository at `./volumes/repos` and 
 
 **Configuration**:
 - Edit \`config/git-sync/.env\` to adjust settings:
-  \`\`\`
+  ```
   SYNC_INTERVAL=300  # Sync check interval in seconds
   PUSH_MODE=push     # "push" for git push, "bundle" for git bundle
   SIGN_COMMITS=false # Set to true to enable commit signing (requires GPG)
   LOG_LEVEL=INFO     # Log verbosity (INFO, ERROR)
   RETRY_MAX=3        # Max retry attempts for failed syncs
   RETRY_BACKOFF=5    # Base backoff time in seconds for retries
-  \`\`\`
+  ```
 
 **Logs**:
 - Logs are stored in \`./volumes/logs\` with filenames like \`sync-<timestamp>.log\` or \`manual-push-<timestamp>.log\`.
 
 **Diagnostics**:
 - Run the diagnostic script to troubleshoot issues:
-  \`\`\`bash
+  ```bash
   ./scripts/diagnose-git-sync.sh
-  \`\`\`
+  ```
   This script checks the container status, configuration files, SSH keys, remote connectivity, logs, and volumes, providing detailed error messages and fixes.
 
 **Sync Report**:
@@ -490,15 +490,15 @@ The Fold Stack includes a unified dashboard powered by [Flame](https://github.co
 #### Enable the Dashboard
 
 1. Ensure `FLAME_PASSWORD` is set in `.env.dev`:
-   \`\`\`bash
+   ```bash
    echo "FLAME_PASSWORD=securepassword123" >> .env.dev
-   \`\`\`
+   ```
    Replace `securepassword123` with a strong password.
 
 2. Run the enable script:
-   \`\`\`bash
+   ```bash
    ./scripts/enable-dashboard.sh
-   \`\`\`
+   ```
 
 3. Access the dashboard at [http://localhost](http://localhost).
    - Log in using the password set in `FLAME_PASSWORD`.
@@ -520,54 +520,54 @@ The Fold Stack includes a unified dashboard powered by [Flame](https://github.co
 
 ### General Issues
 - **Container Not Running**: Check logs for the specific container:
-  \`\`\`bash
+  ```bash
   docker logs <container_name>
-  \`\`\`
+  ```
   Restart the stack:
-  \`\`\`bash
+  ```bash
   ./scripts/down-dev.sh && ./scripts/up-dev.sh
-  \`\`\`
+  ```
 - **Port Conflicts**: Check for port conflicts:
-  \`\`\`bash
+  ```bash
   netstat -tuln | grep <port>
-  \`\`\`
+  ```
   Stop conflicting processes or change the port in \`docker-compose.dev.yml\`.
 
 ### Rclone Issues
 - **Sync Not Working**: Verify Rclone remotes:
-  \`\`\`bash
+  ```bash
   rclone listremotes --config ./config/rclone/rclone.conf
-  \`\`\`
+  ```
   Reconfigure if needed:
-  \`\`\`bash
+  ```bash
   rclone config
-  \`\`\`
+  ```
 - **Permission Issues**: Fix volume permissions:
-  \`\`\`bash
+  ```bash
   chmod -R 775 ./volumes
   chown -R 1000:1000 ./volumes
-  \`\`\`
+  ```
 
 ### Overleaf CE Issues
 - **Startup Errors**: Check logs for Overleaf, MongoDB, and Redis:
-  \`\`\`bash
+  ```bash
   docker logs overleaf_dev
   docker logs overleaf_mongo_dev
   docker logs overleaf_redis_dev
-  \`\`\`
+  ```
   Ensure MongoDB and Redis are healthy before Overleaf starts (handled by \`depends_on\` in \`docker-compose.dev.yml\`).
 
 ### Git-Sync Issues
 - **Sync Fails**: Run diagnostics:
-  \`\`\`bash
+  ```bash
   ./scripts/diagnose-git-sync.sh
-  \`\`\`
+  ```
   Ensure SSH keys are correctly set up and remotes are accessible.
 - **Radicle Not Syncing**: Radicle sync is a placeholder. Implement the \`rad\` CLI in \`entrypoint.sh\` if needed.
 - **Check Sync Status**: Generate a sync report:
-  \`\`\`bash
+  ```bash
   ./scripts/report-git-sync.sh
-  \`\`\`
+  ```
 
 ---
 
