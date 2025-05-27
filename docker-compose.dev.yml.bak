@@ -107,30 +107,33 @@ services:
       - fold-network
 
   nextcloud:
-    image: nextcloud:stable
-    container_name: nextcloud_dev
-    ports:
-      - "8081:80"
-    volumes:
-      - ./volumes/nextcloud/html:/var/www/html
-      - ./volumes/nextcloud/data:/var/www/html/data
-      - ./volumes/scrolls:/var/www/html/data/admin/files/scrolls:ro
-      - ./volumes/ghost:/var/www/html/data/admin/files/ghost:ro
-      - ./volumes/trilium:/var/www/html/data/admin/files/trilium:ro
-      - ./volumes/hedgedoc/uploads:/var/www/html/data/admin/files/hedgedoc_uploads:ro
-    environment:
-      - NEXTCLOUD_ADMIN_USER=admin
-      - NEXTCLOUD_ADMIN_PASSWORD=admin_password
-      - NEXTCLOUD_TRUSTED_DOMAINS=localhost
-      - NEXTCLOUD_DEFAULT_LANGUAGE=en
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/status.php"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    restart: unless-stopped
-    networks:
-      - fold-network
+  image: nextcloud:stable
+  container_name: nextcloud_dev
+  ports:
+    - "8081:80"
+  volumes:
+    - ./volumes/nextcloud/html:/var/www/html
+    - ./volumes/nextcloud/data:/var/www/html/data
+    - ./volumes/scrolls:/var/www/html/data/admin/files/scrolls:ro
+    - ./volumes/ghost:/var/www/html/data/admin/files/ghost:ro
+    - ./volumes/trilium:/var/www/html/data/admin/files/trilium:ro
+    - ./volumes/hedgedoc/uploads:/var/www/html/data/admin/files/hedgedoc_uploads:ro
+  environment:
+    - NEXTCLOUD_ADMIN_USER=admin
+    - NEXTCLOUD_ADMIN_PASSWORD=admin_password
+    - NEXTCLOUD_TRUSTED_DOMAINS=localhost localhost:8081
+    - NEXTCLOUD_DEFAULT_LANGUAGE=en
+    - NEXTCLOUD_OVERWRITEHOST=localhost
+    - NEXTCLOUD_OVERWRITEPROTOCOL=http
+    - NEXTCLOUD_OVERWRITEWEBROOT=/nextcloud
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost/status.php"]
+    interval: 10s
+    timeout: 5s
+    retries: 3
+  restart: unless-stopped
+  networks:
+    - fold-network
 
   rclone:
     build: ./rclone
