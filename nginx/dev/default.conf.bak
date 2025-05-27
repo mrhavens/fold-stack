@@ -21,7 +21,7 @@ server {
 
         # Rewrite URLs in responses
         sub_filter_once off;
-        sub_filter_types text/html text/css application/javascript;
+        sub_filter_types text/css application/javascript;
         sub_filter 'href="/' 'href="/flame/';
         sub_filter 'src="/' 'src="/flame/';
         sub_filter 'content="/' 'content="/flame/';
@@ -44,7 +44,7 @@ server {
 
         # Rewrite URLs in responses
         sub_filter_once off;
-        sub_filter_types text/html text/css application/javascript;
+        sub_filter_types text/css application/javascript;
         sub_filter 'href="/' 'href="/ghost/';
         sub_filter 'src="/' 'src="/ghost/';
         sub_filter 'content="/' 'content="/ghost/';
@@ -67,7 +67,7 @@ server {
 
         # Rewrite URLs in responses
         sub_filter_once off;
-        sub_filter_types text/html text/css application/javascript;
+        sub_filter_types text/css application/javascript;
         sub_filter 'href="/' 'href="/forgejo/';
         sub_filter 'src="/' 'src="/forgejo/';
         sub_filter 'content="/' 'content="/forgejo/';
@@ -90,7 +90,7 @@ server {
 
         # Rewrite URLs in responses
         sub_filter_once off;
-        sub_filter_types text/html text/css application/javascript;
+        sub_filter_types text/css application/javascript;
         sub_filter 'href="/' 'href="/trilium/';
         sub_filter 'src="/' 'src="/trilium/';
         sub_filter 'content="/' 'content="/trilium/';
@@ -113,7 +113,7 @@ server {
 
         # Rewrite URLs in responses
         sub_filter_once off;
-        sub_filter_types text/html text/css application/javascript;
+        sub_filter_types text/css application/javascript;
         sub_filter 'href="/' 'href="/hedgedoc/';
         sub_filter 'src="/' 'src="/hedgedoc/';
         sub_filter 'content="/' 'content="/hedgedoc/';
@@ -136,7 +136,7 @@ server {
 
         # Rewrite URLs in responses
         sub_filter_once off;
-        sub_filter_types text/html text/css application/javascript;
+        sub_filter_types text/css application/javascript;
         sub_filter 'href="/' 'href="/nextcloud/';
         sub_filter 'src="/' 'src="/nextcloud/';
         sub_filter 'content="/' 'content="/nextcloud/';
