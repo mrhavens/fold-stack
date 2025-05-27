@@ -483,6 +483,39 @@ The Git-Sync Mirror Agent watches the local repository at `./volumes/repos` and 
 
 ---
 
+### 13. **Unified Sovereign Dashboard: Control Plane**
+
+The Fold Stack includes a unified dashboard powered by [Flame](https://github.com/pawelmalak/flame), running on port 80. This control plane provides visual access to all services and exposes internal scripts for diagnostics, syncing, and integrity checks.
+
+#### Enable the Dashboard
+
+1. Ensure `FLAME_PASSWORD` is set in `.env.dev`:
+   \`\`\`bash
+   echo "FLAME_PASSWORD=securepassword123" >> .env.dev
+   \`\`\`
+   Replace `securepassword123` with a strong password.
+
+2. Run the enable script:
+   \`\`\`bash
+   ./scripts/enable-dashboard.sh
+   \`\`\`
+
+3. Access the dashboard at [http://localhost](http://localhost).
+   - Log in using the password set in `FLAME_PASSWORD`.
+
+#### Dashboard Features
+
+- **Services**: Links to Ghost, Forgejo, Trilium, HedgeDoc, Nextcloud, MailHog, and a placeholder for Scroll Renderer (Typst/Pandoc).
+- **Scripts**: Placeholders for running `diagnose-stack.sh`, `sync-stage-to-prod.sh`, `seal-foldstate.sh`, and `watch-fold-integrity.sh` (requires future implementation for UI triggering).
+- **Customization**: Configurable via `volumes/flame/bookmarks.yml`.
+
+#### Notes
+
+- The dashboard runs on port 80 in development. For production, consider rebinding to port 8080 to avoid conflicts.
+- The container is hardened with read-only filesystem and limited capabilities for security.
+
+---
+
 ## 🛠️ Troubleshooting
 
 ### General Issues
