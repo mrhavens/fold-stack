@@ -11,12 +11,12 @@ sync_to_gdrive() {
     rclone sync "$src" "gdrive:$dest" --progress --transfers=4 --checkers=8 --exclude "*.{db,db-shm,db-wal}" --log-level INFO
 }
 
-# Function to sync to Internet Archive (only .scroll and .seal files)
+# Function to sync to Internet Archive (only .scroll, .seal, .typ, and .tex files)
 sync_to_ia() {
     local src=$1
     local dest=$2
     echo "Syncing $src to Internet Archive (ia:$dest)"
-    rclone sync "$src" "ia:$dest" --progress --transfers=4 --checkers=8 --wait-archive=1h --include "*.{scroll,seal}" --log-level INFO
+    rclone sync "$src" "ia:$dest" --progress --transfers=4 --checkers=8 --wait-archive=1h --include "*.{scroll,seal,typ,tex}" --log-level INFO
 }
 
 # Function to sync to Web3.storage
@@ -35,7 +35,7 @@ sync_to_web3() {
 sync_to_gdrive "/data/scrolls" "fold-stack/scrolls"
 sync_to_gdrive "/data/hedgedoc/uploads" "fold-stack/hedgedoc_uploads"
 
-# Sync scrolls/seals to Internet Archive
+# Sync scrolls/seals/typ/tex to Internet Archive
 sync_to_ia "/data/scrolls" "fold-stack-scrolls"
 
 # Sync Trilium backups to Web3.storage

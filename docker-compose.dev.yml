@@ -55,6 +55,7 @@ services:
       - ./volumes/scrolls:/workspace
     working_dir: /workspace
     entrypoint: /bin/sh
+    command: ["-c", "tail -f /dev/null"]
     networks:
       - fold-network
 
@@ -121,11 +122,57 @@ services:
     volumes:
       - ./config/rclone/rclone.conf:/config/rclone/rclone.conf:ro
       - ./volumes:/data:ro
-      - /mnt/nas:/nas
       - ./scripts/rclone-sync.sh:/rclone-sync.sh:ro
       - ./scripts/rclone-watch.sh:/rclone-watch.sh:ro
     entrypoint: ["/bin/sh", "/rclone-watch.sh"]
     user: "1000:1000"
+    networks:
+      - fold-network
+
+  typst:
+    image: ghcr.io/typst/typst:latest
+    container_name: typst_dev
+    volumes:
+      - ./volumes/scrolls:/workspace
+    working_dir: /workspace
+    entrypoint: /bin/sh
+    command: ["-c", "tail -f /dev/null"]
+    networks:
+      - fold-network
+
+  overleaf-mongo:
+    image: mongo:6
+    container_name: overleaf_mongo_dev
+    volumes:
+      - ./volumes/overleaf/mongo:/data/db
+    networks:
+      - fold-network
+
+  overleaf-redis:
+    image: redis:7
+    container_name: overleaf_redis_dev
+    volumes:
+      - ./volumes/overleaf/redis:/data
+    networks:
+      - fold-network
+
+  overleaf:
+    image: overleaf/overleaf:latest
+    container_name: overleaf_dev
+    ports:
+      - "8090:80"
+    volumes:
+      - ./volumes/overleaf/data:/var/lib/sharelatex
+      - ./volumes/scrolls:/var/lib/sharelatex/data/files:ro
+    environment:
+      - SHARELATEX_MONGO_URL=mongodb://overleaf-mongo:27017/sharelatex
+      - SHARELATEX_REDIS_URL=redis://overleaf-redis:6379
+      - SHARELATEX_LISTEN_IP=0.0.0.0
+      - SHARELATEX_PORT=80
+      - SHARELATEX_ADMIN_EMAIL=admin@example.com
+    depends_on:
+      - overleaf-mongo
+      - overleaf-redis
     networks:
       - fold-network
 

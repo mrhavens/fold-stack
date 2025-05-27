@@ -10,35 +10,35 @@ NC='\033[0m' # No Color
 echo "================================="
 echo "🩺 FOLD STACK COMPREHENSIVE DIAGNOSTICS"
 echo "================================="
-echo "📅 Date: Mon May 26 20:28:00 CDT 2025"
+echo "📅 Date: $(date)"
 echo ""
 
 # Helper function to print section headers
 print_section() {
     echo "---------------------------------"
-    echo "📌 "
+    echo "📌 $1"
     echo "---------------------------------"
 }
 
 # Helper function to print success
 print_success() {
-    echo -e "✅ "
+    echo -e "${GREEN}✅ $1${NC}"
 }
 
 # Helper function to print warning
 print_warning() {
-    echo -e "⚠️  "
+    echo -e "${YELLOW}⚠️  $1${NC}"
 }
 
 # Helper function to print error
 print_error() {
-    echo -e "❌ "
+    echo -e "${RED}❌ $1${NC}"
 }
 
 # 1. Check Current Directory
 print_section "Current Directory"
-echo "📁 Current Directory: /home/mrhavens/fieldwork/fold-stack"
-if [[ "/home/mrhavens/fieldwork/fold-stack" != *"/fieldwork/fold-stack" ]]; then
+echo "📁 Current Directory: $(pwd)"
+if [[ "$(pwd)" != *"/fieldwork/fold-stack" ]]; then
     print_error "You are not in the expected fold-stack directory. Please run this script from ~/fieldwork/fold-stack."
     exit 1
 fi
@@ -73,6 +73,7 @@ docker compose -f docker-compose.dev.yml port trilium 8080 || print_error "Trili
 docker compose -f docker-compose.dev.yml port hedgedoc 3000 || print_error "HedgeDoc not exposing port 3000"
 docker compose -f docker-compose.dev.yml port mailhog 8025 || print_error "MailHog not exposing port 8025"
 docker compose -f docker-compose.dev.yml port nextcloud 80 || print_error "Nextcloud not exposing port 80"
+docker compose -f docker-compose.dev.yml port overleaf 80 || print_warning "Overleaf CE not exposing port 80 (run ./scripts/enable-overleaf.sh to start)"
 
 # 6. Check Logs for Each Service
 print_section "Forgejo Logs (last 50 lines)"
@@ -96,6 +97,21 @@ docker logs nextcloud_dev --tail=20 2>&1 || print_warning "Nextcloud container n
 print_section "Rclone Logs (last 20 lines)"
 docker logs rclone_dev --tail=20 2>&1 || print_warning "Rclone container not found."
 
+print_section "Pandoc Logs (last 20 lines)"
+docker logs pandoc_dev --tail=20 2>&1 || print_warning "Pandoc container not found."
+
+print_section "Typst Logs (last 20 lines)"
+docker logs typst_dev --tail=20 2>&1 || print_warning "Typst container not found."
+
+print_section "Overleaf Logs (last 20 lines)"
+docker logs overleaf_dev --tail=20 2>&1 || print_warning "Overleaf CE container not found (run ./scripts/enable-overleaf.sh to start)."
+
+print_section "Overleaf Mongo Logs (last 20 lines)"
+docker logs overleaf_mongo_dev --tail=20 2>&1 || print_warning "Overleaf Mongo container not found (run ./scripts/enable-overleaf.sh to start)."
+
+print_section "Overleaf Redis Logs (last 20 lines)"
+docker logs overleaf_redis_dev --tail=20 2>&1 || print_warning "Overleaf Redis container not found (run ./scripts/enable-overleaf.sh to start)."
+
 # 7. Check Volume Permissions and Contents
 print_section "Forgejo Volume Permissions"
 ls -ld ./volumes/forgejo || print_error "Missing volumes/forgejo"
@@ -115,13 +131,17 @@ ls -la ./volumes/nextcloud/html || print_warning "Nextcloud html volume contents
 ls -ld ./volumes/nextcloud/data || print_error "Missing volumes/nextcloud/data"
 ls -la ./volumes/nextcloud/data || print_warning "Nextcloud data volume contents not accessible"
 
-print_section "Scrolls Volume Permissions (Pandoc)"
+print_section "Scrolls Volume Permissions (Pandoc/Typst/Overleaf)"
 ls -ld ./volumes/scrolls || print_error "Missing volumes/scrolls"
 ls -la ./volumes/scrolls || print_warning "Scrolls volume contents not accessible"
 
 print_section "Trilium Backup Volume Permissions"
 ls -ld ./volumes/trilium-backup || print_warning "Missing volumes/trilium-backup (needed for Web3.storage sync)"
 ls -la ./volumes/trilium-backup || print_warning "Trilium backup volume contents not accessible"
+
+print_section "Overleaf Volume Permissions"
+ls -ld ./volumes/overleaf || print_warning "Missing volumes/overleaf (needed for Overleaf CE persistence)"
+ls -la ./volumes/overleaf || print_warning "Overleaf volume contents not accessible"
 
 # 8. Check Entrypoint Script for Forgejo
 print_section "Forgejo Entrypoint Script Check (forgejo-entrypoint.sh)"
@@ -154,7 +174,7 @@ fi
 
 # 11. Test Rclone Sync by Adding a Test File
 print_section "Rclone Sync Test"
-TEST_FILE="./volumes/scrolls/diagnostic-test-1748309280.scroll"
+TEST_FILE="./volumes/scrolls/diagnostic-test-$(date +%s).scroll"
 echo "Test file for diagnostics" > "$TEST_FILE"
 echo "Created test file: $TEST_FILE"
 echo "Waiting for Rclone to detect and sync (up to 30 seconds)..."

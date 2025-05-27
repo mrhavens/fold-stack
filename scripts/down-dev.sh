@@ -1,2 +1,6 @@
 #!/bin/bash
-docker compose -f docker-compose.dev.yml --env-file .env.dev down -v
+set -e
+
+echo "Shutting down fold-stack development environment..."
+docker compose -f docker-compose.dev.yml down
+echo "All services stopped."
