@@ -1,0 +1,146 @@
+server {
+    listen 80;
+
+    # Redirect root to Flame dashboard
+    location = / {
+        return 302 /flame/;
+    }
+
+    # Proxy for Flame Dashboard
+    location /flame/ {
+        proxy_pass http://flame_dashboard_dev:5005/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Prevent caching
+        proxy_set_header Accept-Encoding "";
+        proxy_hide_header Cache-Control;
+        add_header Cache-Control "no-store";
+
+        # Rewrite URLs in responses
+        sub_filter_once off;
+        sub_filter_types text/html text/css application/javascript;
+        sub_filter 'href="/' 'href="/flame/';
+        sub_filter 'src="/' 'src="/flame/';
+        sub_filter 'content="/' 'content="/flame/';
+        sub_filter 'url(/' 'url(/flame/';
+        sub_filter '"/flame/flame/' '"/flame/';
+    }
+
+    # Proxy for Ghost
+    location /ghost/ {
+        proxy_pass http://ghost_dev:2368/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Prevent caching
+        proxy_set_header Accept-Encoding "";
+        proxy_hide_header Cache-Control;
+        add_header Cache-Control "no-store";
+
+        # Rewrite URLs in responses
+        sub_filter_once off;
+        sub_filter_types text/html text/css application/javascript;
+        sub_filter 'href="/' 'href="/ghost/';
+        sub_filter 'src="/' 'src="/ghost/';
+        sub_filter 'content="/' 'content="/ghost/';
+        sub_filter 'url(/' 'url(/ghost/';
+        sub_filter '"/ghost/ghost/' '"/ghost/';
+    }
+
+    # Proxy for Forgejo
+    location /forgejo/ {
+        proxy_pass http://forgejo_dev:3000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Prevent caching
+        proxy_set_header Accept-Encoding "";
+        proxy_hide_header Cache-Control;
+        add_header Cache-Control "no-store";
+
+        # Rewrite URLs in responses
+        sub_filter_once off;
+        sub_filter_types text/html text/css application/javascript;
+        sub_filter 'href="/' 'href="/forgejo/';
+        sub_filter 'src="/' 'src="/forgejo/';
+        sub_filter 'content="/' 'content="/forgejo/';
+        sub_filter 'url(/' 'url(/forgejo/';
+        sub_filter '"/forgejo/forgejo/' '"/forgejo/';
+    }
+
+    # Proxy for Trilium
+    location /trilium/ {
+        proxy_pass http://trilium_dev:8080/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Prevent caching
+        proxy_set_header Accept-Encoding "";
+        proxy_hide_header Cache-Control;
+        add_header Cache-Control "no-store";
+
+        # Rewrite URLs in responses
+        sub_filter_once off;
+        sub_filter_types text/html text/css application/javascript;
+        sub_filter 'href="/' 'href="/trilium/';
+        sub_filter 'src="/' 'src="/trilium/';
+        sub_filter 'content="/' 'content="/trilium/';
+        sub_filter 'url(/' 'url(/trilium/';
+        sub_filter '"/trilium/trilium/' '"/trilium/';
+    }
+
+    # Proxy for HedgeDoc
+    location /hedgedoc/ {
+        proxy_pass http://hedgedoc_dev:3000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Prevent caching
+        proxy_set_header Accept-Encoding "";
+        proxy_hide_header Cache-Control;
+        add_header Cache-Control "no-store";
+
+        # Rewrite URLs in responses
+        sub_filter_once off;
+        sub_filter_types text/html text/css application/javascript;
+        sub_filter 'href="/' 'href="/hedgedoc/';
+        sub_filter 'src="/' 'src="/hedgedoc/';
+        sub_filter 'content="/' 'content="/hedgedoc/';
+        sub_filter 'url(/' 'url(/hedgedoc/';
+        sub_filter '"/hedgedoc/hedgedoc/' '"/hedgedoc/';
+    }
+
+    # Proxy for Nextcloud
+    location /nextcloud/ {
+        proxy_pass http://nextcloud_dev:80/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Prevent caching
+        proxy_set_header Accept-Encoding "";
+        proxy_hide_header Cache-Control;
+        add_header Cache-Control "no-store";
+
+        # Rewrite URLs in responses
+        sub_filter_once off;
+        sub_filter_types text/html text/css application/javascript;
+        sub_filter 'href="/' 'href="/nextcloud/';
+        sub_filter 'src="/' 'src="/nextcloud/';
+        sub_filter 'content="/' 'content="/nextcloud/';
+        sub_filter 'url(/' 'url(/nextcloud/';
+        sub_filter '"/nextcloud/nextcloud/' '"/nextcloud/';
+    }
+}
