@@ -1,4 +1,3 @@
-
 # Fold-Stack: A Sovereign Development Environment
 
 **Fold-Stack** is a self-hosted, sovereign development environment designed for fieldcraft, collaboration, and resilient data management. It integrates a suite of tools for blogging, version control, note-taking, document editing, file storage, and replication across cloud services. This stack is built with Docker Compose for easy deployment and management.
