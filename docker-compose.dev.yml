@@ -89,6 +89,28 @@ services:
       - CMD_DOMAIN=localhost:3030
       - CMD_PROTOCOL_USESSL=false
       - CMD_DB_URL=sqlite:/hedgedoc/public/uploads/hedgedoc.db
+    user: "1000:1000"
+    restart: unless-stopped
+    networks:
+      - fold-network
+
+  nextcloud:
+    image: nextcloud:stable
+    container_name: nextcloud_dev
+    ports:
+      - "8081:80"
+    volumes:
+      - ./volumes/nextcloud/html:/var/www/html
+      - ./volumes/nextcloud/data:/var/www/html/data
+      - ./volumes/scrolls:/var/www/html/data/admin/files/scrolls:ro
+      - ./volumes/ghost:/var/www/html/data/admin/files/ghost:ro
+      - ./volumes/trilium:/var/www/html/data/admin/files/trilium:ro
+      - ./volumes/hedgedoc/uploads:/var/www/html/data/admin/files/hedgedoc_uploads:ro
+    environment:
+      - NEXTCLOUD_ADMIN_USER=admin
+      - NEXTCLOUD_ADMIN_PASSWORD=admin_password
+      - NEXTCLOUD_TRUSTED_DOMAINS=localhost
+      - NEXTCLOUD_DEFAULT_LANGUAGE=en
     restart: unless-stopped
     networks:
       - fold-network
