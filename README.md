@@ -476,9 +476,9 @@ The Git-Sync Mirror Agent watches the local repository at `./volumes/repos` and 
 
 **Sync Report**:
 - Generate a report to see the latest sync activity for each remote:
-  \`\`\`bash
+  ```bash
   ./scripts/report-git-sync.sh
-  \`\`\`
+  ``` 
   This report shows the latest commit in the local repository, the last successful sync for each remote (with timestamp and commit/bundle details), and any recent failed sync attempts.
 
 ---
