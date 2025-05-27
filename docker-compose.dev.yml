@@ -115,6 +115,20 @@ services:
     networks:
       - fold-network
 
+  rclone:
+    build: ./rclone
+    container_name: rclone_dev
+    volumes:
+      - ./config/rclone/rclone.conf:/config/rclone/rclone.conf:ro
+      - ./volumes:/data:ro
+      - /mnt/nas:/nas
+      - ./scripts/rclone-sync.sh:/rclone-sync.sh:ro
+      - ./scripts/rclone-watch.sh:/rclone-watch.sh:ro
+    entrypoint: ["/bin/sh", "/rclone-watch.sh"]
+    user: "1000:1000"
+    networks:
+      - fold-network
+
 networks:
   fold-network:
     driver: bridge
