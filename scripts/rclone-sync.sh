@@ -31,18 +31,6 @@ sync_to_web3() {
     fi
 }
 
-# Function to sync to NAS
-sync_to_nas() {
-    local src=$1
-    local dest=$2
-    if [ -d "/nas" ]; then
-        echo "Syncing $src to NAS (/nas/$dest)"
-        rclone sync "$src" "/nas/$dest" --progress --transfers=4 --checkers=8 --exclude "*.{db,db-shm,db-wal}" --log-level INFO
-    else
-        echo "NAS mount not found at /nas, skipping NAS sync"
-    fi
-}
-
 # Sync working drafts to Google Drive
 sync_to_gdrive "/data/scrolls" "fold-stack/scrolls"
 sync_to_gdrive "/data/hedgedoc/uploads" "fold-stack/hedgedoc_uploads"
@@ -52,11 +40,5 @@ sync_to_ia "/data/scrolls" "fold-stack-scrolls"
 
 # Sync Trilium backups to Web3.storage
 sync_to_web3 "/data/trilium-backup" "fold-stack-trilium"
-
-# Sync all directories to NAS
-sync_to_nas "/data/scrolls" "fold-stack/scrolls"
-sync_to_nas "/data/hedgedoc/uploads" "fold-stack/hedgedoc_uploads"
-sync_to_nas "/data/ghost" "fold-stack/ghost"
-sync_to_nas "/data/trilium" "fold-stack/trilium"
 
 echo "Synchronization completed at $(date)"

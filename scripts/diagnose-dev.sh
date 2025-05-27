@@ -46,6 +46,10 @@ echo "🪵 Nextcloud Logs (last 20 lines):"
 docker logs nextcloud_dev --tail=20 || echo "⚠️  Nextcloud container not found."
 
 echo ""
+echo "🪵 Rclone Logs (last 20 lines):"
+docker logs rclone_dev --tail=20 || echo "⚠️  Rclone container not found."
+
+echo ""
 echo "🌐 Port Bindings:"
 docker compose -f docker-compose.dev.yml port ghost 2368 || echo "❌ Ghost not exposing port 2368"
 docker compose -f docker-compose.dev.yml port forgejo 3000 || echo "❌ Forgejo not exposing port 3000"
