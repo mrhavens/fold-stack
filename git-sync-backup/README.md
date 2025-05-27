@@ -100,7 +100,7 @@ ssh-keygen -t ed25519 -C "your_email@example.com" -f ~/.ssh/forgejo_key
    \`\`\`bash
    ssh -i ~/.ssh/github_key -T git@github.com
    \`\`\`
-   You should see: `Hi mrhavens! You’ve successfully authenticated...`.
+   You should see: `Hi mrhavens! You've successfully authenticated...`.
 
 #### 4.2 Add SSH Key to Forgejo
 1. Copy the public key:
