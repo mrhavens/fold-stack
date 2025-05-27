@@ -441,13 +441,13 @@ The Git-Sync Mirror Agent watches the local repository at `./volumes/repos` and 
    You should see the sync process for each configured remote.
 
 3. **Verify Sync**:
-   - **GitHub**: Check your GitHub repository (`mrhavens/mirror-repo`).
-   - **Forgejo**: Check `http://localhost:3000/mrhavens/mirror-repo`.
-   - **Internet Archive**: Check `fold-stack-git-mirror` for Git bundles.
-   - **Web3.storage**: Enable in `remotes.conf` and check `fold-stack-git-mirror`.
+   - **GitHub**: Check your GitHub repository (\`mrhavens/mirror-repo\`).
+   - **Forgejo**: Check \`http://localhost:3000/mrhavens/mirror-repo\`.
+   - **Internet Archive**: Check \`fold-stack-git-mirror\` for Git bundles.
+   - **Web3.storage**: Enable in \`remotes.conf\` and check \`fold-stack-git-mirror\`.
 
 **Configuration**:
-- Edit `config/git-sync/.env` to adjust settings:
+- Edit \`config/git-sync/.env\` to adjust settings:
   \`\`\`
   SYNC_INTERVAL=300  # Sync check interval in seconds
   PUSH_MODE=push     # "push" for git push, "bundle" for git bundle
@@ -458,7 +458,21 @@ The Git-Sync Mirror Agent watches the local repository at `./volumes/repos` and 
   \`\`\`
 
 **Logs**:
-- Logs are stored in `./volumes/logs` with filenames like `sync-<timestamp>.log`.
+- Logs are stored in \`./volumes/logs\` with filenames like \`sync-<timestamp>.log\`.
+
+**Diagnostics**:
+- Run the diagnostic script to troubleshoot issues:
+  \`\`\`bash
+  ./scripts/diagnose-git-sync.sh
+  \`\`\`
+  This script checks the container status, configuration files, SSH keys, remote connectivity, logs, and volumes, providing detailed error messages and fixes.
+
+**Sync Report**:
+- Generate a report to see the latest sync activity for each remote:
+  \`\`\`bash
+  ./scripts/report-git-sync.sh
+  \`\`\`
+  This report shows the latest commit in the local repository, the last successful sync for each remote (with timestamp and commit/bundle details), and any recent failed sync attempts.
 
 ---
 
@@ -477,7 +491,7 @@ The Git-Sync Mirror Agent watches the local repository at `./volumes/repos` and 
   \`\`\`bash
   netstat -tuln | grep <port>
   \`\`\`
-  Stop conflicting processes or change the port in `docker-compose.dev.yml`.
+  Stop conflicting processes or change the port in \`docker-compose.dev.yml\`.
 
 ### Rclone Issues
 - **Sync Not Working**: Verify Rclone remotes:
@@ -501,15 +515,19 @@ The Git-Sync Mirror Agent watches the local repository at `./volumes/repos` and 
   docker logs overleaf_mongo_dev
   docker logs overleaf_redis_dev
   \`\`\`
-  Ensure MongoDB and Redis are healthy before Overleaf starts (handled by `depends_on` in `docker-compose.dev.yml`).
+  Ensure MongoDB and Redis are healthy before Overleaf starts (handled by \`depends_on\` in \`docker-compose.dev.yml\`).
 
 ### Git-Sync Issues
-- **Sync Fails**: Check logs:
+- **Sync Fails**: Run diagnostics:
   \`\`\`bash
-  docker logs git_sync_dev
+  ./scripts/diagnose-git-sync.sh
   \`\`\`
   Ensure SSH keys are correctly set up and remotes are accessible.
-- **Radicle Not Syncing**: Radicle sync is a placeholder. Implement the `rad` CLI in `entrypoint.sh` if needed.
+- **Radicle Not Syncing**: Radicle sync is a placeholder. Implement the \`rad\` CLI in \`entrypoint.sh\` if needed.
+- **Check Sync Status**: Generate a sync report:
+  \`\`\`bash
+  ./scripts/report-git-sync.sh
+  \`\`\`
 
 ---
 
@@ -534,16 +552,15 @@ The Git-Sync Mirror Agent watches the local repository at `./volumes/repos` and 
 Contributions are welcome! To contribute:
 
 1. Fork the repository.
-2. Create a new branch: `git checkout -b feature/your-feature`.
-3. Make your changes and commit: `git commit -m "Add your feature"`.
-4. Push to your branch: `git push origin feature/your-feature`.
+2. Create a new branch: \`git checkout -b feature/your-feature\`.
+3. Make your changes and commit: \`git commit -m "Add your feature"\`.
+4. Push to your branch: \`git push origin feature/your-feature\`.
 5. Open a pull request.
 
 ---
 
 ## 📅 Last Updated
 
-This README was last updated on **May 26, 2025, at 09:21 PM CDT**.
+This README was last updated on **May 26, 2025, at 09:35 PM CDT**.
 
 ---
-Updated README
