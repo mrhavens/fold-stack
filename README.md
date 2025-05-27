@@ -434,13 +434,20 @@ The Git-Sync Mirror Agent watches the local repository at `./volumes/repos` and 
    git commit -m "Change 1"
    \`\`\`
 
-2. **Monitor Git-Sync Logs**:
+2. **Manually Push to All Remotes**:
+   To trigger a manual sync to all configured remotes, run:
+   \`\`\`bash
+   ./scripts/manual-push-git-sync.sh
+   \`\`\`
+   This script pushes the latest changes to all enabled remotes immediately, bypassing the automated sync interval.
+
+3. **Monitor Git-Sync Logs**:
    \`\`\`bash
    docker logs git_sync_dev --follow
    \`\`\`
    You should see the sync process for each configured remote.
 
-3. **Verify Sync**:
+4. **Verify Sync**:
    - **GitHub**: Check your GitHub repository (\`mrhavens/mirror-repo\`).
    - **Forgejo**: Check \`http://localhost:3000/mrhavens/mirror-repo\`.
    - **Internet Archive**: Check \`fold-stack-git-mirror\` for Git bundles.
@@ -458,7 +465,7 @@ The Git-Sync Mirror Agent watches the local repository at `./volumes/repos` and 
   \`\`\`
 
 **Logs**:
-- Logs are stored in \`./volumes/logs\` with filenames like \`sync-<timestamp>.log\`.
+- Logs are stored in \`./volumes/logs\` with filenames like \`sync-<timestamp>.log\` or \`manual-push-<timestamp>.log\`.
 
 **Diagnostics**:
 - Run the diagnostic script to troubleshoot issues:
@@ -561,6 +568,4 @@ Contributions are welcome! To contribute:
 
 ## 📅 Last Updated
 
-This README was last updated on **May 26, 2025, at 09:35 PM CDT**.
-
----
+This README was last updated on **May 26, 2025, at 09:55 PM CDT**.
