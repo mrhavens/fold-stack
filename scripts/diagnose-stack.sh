@@ -112,6 +112,9 @@ docker logs overleaf_mongo_dev --tail=20 2>&1 || print_warning "Overleaf Mongo c
 print_section "Overleaf Redis Logs (last 20 lines)"
 docker logs overleaf_redis_dev --tail=20 2>&1 || print_warning "Overleaf Redis container not found (run ./scripts/enable-overleaf.sh to start)."
 
+print_section "Git-Sync Logs (last 20 lines)"
+docker logs git_sync_dev --tail=20 2>&1 || print_warning "Git-Sync container not found."
+
 # 7. Check Volume Permissions and Contents
 print_section "Forgejo Volume Permissions"
 ls -ld ./volumes/forgejo || print_error "Missing volumes/forgejo"
@@ -142,6 +145,14 @@ ls -la ./volumes/trilium-backup || print_warning "Trilium backup volume contents
 print_section "Overleaf Volume Permissions"
 ls -ld ./volumes/overleaf || print_warning "Missing volumes/overleaf (needed for Overleaf CE persistence)"
 ls -la ./volumes/overleaf || print_warning "Overleaf volume contents not accessible"
+
+print_section "Git Repositories Volume Permissions"
+ls -ld ./volumes/repos || print_error "Missing volumes/repos (needed for Git-Sync)"
+ls -la ./volumes/repos || print_warning "Git repositories volume contents not accessible"
+
+print_section "Logs Volume Permissions"
+ls -ld ./volumes/logs || print_error "Missing volumes/logs (needed for logging)"
+ls -la ./volumes/logs || print_warning "Logs volume contents not accessible"
 
 # 8. Check Entrypoint Script for Forgejo
 print_section "Forgejo Entrypoint Script Check (forgejo-entrypoint.sh)"

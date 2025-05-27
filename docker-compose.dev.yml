@@ -189,6 +189,16 @@ services:
     networks:
       - fold-network
 
+  git-sync:
+    build: ./git-sync
+    container_name: git_sync_dev
+    volumes:
+      - ./config/git-sync:/config/git-sync:ro
+      - ./volumes/repos:/repos/local
+      - ./volumes/logs:/logs
+    networks:
+      - fold-network
+
 networks:
   fold-network:
     driver: bridge

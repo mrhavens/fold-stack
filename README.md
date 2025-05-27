@@ -17,6 +17,7 @@ Fold-Stack provides a modular, self-contained environment for:
 - **Data Replication**: Rclone for syncing data to Google Drive, Internet Archive, and Web3.storage.
 - **Document Compilation**: Typst for fast, modern document creation.
 - **LaTeX Collaboration**: Overleaf CE for collaborative LaTeX editing.
+- **Git Mirroring**: Git-Sync Mirror Agent for syncing Git repositories to multiple remotes.
 
 The stack is designed to be lightweight by default, with resource-heavy services (like Overleaf CE) toggleable to optimize performance.
 
@@ -37,6 +38,7 @@ Before setting up Fold-Stack, ensure you have the following:
   - Google Drive (for `gdrive` remote).
   - Internet Archive (for `ia` remote).
   - Web3.storage (for `web3` remote, requires an API token).
+- SSH keys for GitHub and Forgejo (for Git-Sync).
 
 ---
 
@@ -121,7 +123,48 @@ Fold-Stack uses Rclone to replicate data to Google Drive, Internet Archive, and 
    \`\`\`
    You should see: `gdrive:`, `ia:`, `nextcloud:`, `web3:`.
 
-### 4. Start the Stack
+### 4. Configure Git-Sync Mirror Agent
+
+The Git-Sync Mirror Agent syncs a local Git repository to multiple remotes (GitHub, Forgejo, Radicle, Internet Archive, and optionally Web3.storage).
+
+1. **Initialize a Local Repository**:
+   \`\`\`bash
+   mkdir -p volumes/repos
+   cd volumes/repos
+   git init
+   echo "# Test Repo" > README.md
+   git add .
+   git commit -m "Initial commit"
+   git branch -M main
+   \`\`\`
+
+2. **Set Up SSH Keys for GitHub and Forgejo**:
+   - Generate SSH keys if you don’t already have them:
+     \`\`\`bash
+     ssh-keygen -t ed25519 -C "your_email@example.com" -f ~/.ssh/github_key
+     ssh-keygen -t ed25519 -C "your_email@example.com" -f ~/.ssh/forgejo_key
+     \`\`\`
+   - Add the public keys to GitHub and Forgejo:
+     - GitHub: Add `~/.ssh/github_key.pub` to your GitHub account (Settings > SSH and GPG keys).
+     - Forgejo: Add `~/.ssh/forgejo_key.pub` to your Forgejo account (http://localhost:3000/user/settings/keys).
+   - Copy the private keys to the `git-sync` secrets directory:
+     \`\`\`bash
+     cp ~/.ssh/github_key config/git-sync/secrets/github.key
+     cp ~/.ssh/forgejo_key config/git-sync/secrets/forgejo.key
+     chmod 600 config/git-sync/secrets/github.key config/git-sync/secrets/forgejo.key
+     \`\`\`
+
+3. **Configure Remotes**:
+   Edit `config/git-sync/remotes.conf` to match your repository URLs:
+   \`\`\`
+   github|git|git@github.com:mrhavens/mirror-repo.git|1
+   forgejo|git|git@localhost:2222/mrhavens/mirror-repo.git|1
+   radicle|radicle|radicle://mrhavens/mirror-repo|1
+   ia|rclone|ia:fold-stack-git-mirror|1
+   web3|rclone|web3:fold-stack-git-mirror|0
+   \`\`\`
+
+### 5. Start the Stack
 
 Fold-Stack uses Docker Compose to manage services. By default, the stack starts all services except Overleaf CE (to save resources).
 
@@ -140,7 +183,7 @@ Fold-Stack uses Docker Compose to manage services. By default, the stack starts 
    ./scripts/enable-typst.sh
    \`\`\`
 
-### 5. Verify Services are Running
+### 6. Verify Services are Running
 
 Check the status of all containers:
 \`\`\`bash
@@ -158,7 +201,7 @@ docker logs <container_name>
 \`\`\`
 For example: `docker logs overleaf_dev`.
 
-### 6. Stop the Stack
+### 7. Stop the Stack
 
 To stop all services:
 \`\`\`bash
@@ -183,6 +226,7 @@ Below are the URLs to access each service running in Fold-Stack. All services ar
 | **Nextcloud** | [http://localhost:8081](http://localhost:8081) | File storage and sharing platform.       | Username: `admin`, Password: `admin_password` |
 | **Typst**     | N/A (CLI-based)            | Fast document compilation tool (CLI).    | N/A                                |
 | **Overleaf CE** | [http://localhost:8090](http://localhost:8090) | Collaborative LaTeX editor (run `./scripts/enable-overleaf.sh` to start). | First user registration is admin (email: `admin@example.com`). |
+| **Git-Sync**  | N/A (CLI-based)            | Git repository mirroring agent.          | N/A                                |
 
 ---
 
@@ -378,6 +422,46 @@ docker compose -f docker-compose.dev.yml stop overleaf overleaf-mongo overleaf-r
 
 ---
 
+### 12. **Git-Sync: Mirror a Git Repository**
+
+The Git-Sync Mirror Agent watches the local repository at `./volumes/repos` and syncs changes to GitHub, Forgejo, Radicle, Internet Archive, and optionally Web3.storage.
+
+1. **Add a Commit to the Local Repository**:
+   \`\`\`bash
+   cd volumes/repos
+   echo "Change 1" >> README.md
+   git add .
+   git commit -m "Change 1"
+   \`\`\`
+
+2. **Monitor Git-Sync Logs**:
+   \`\`\`bash
+   docker logs git_sync_dev --follow
+   \`\`\`
+   You should see the sync process for each configured remote.
+
+3. **Verify Sync**:
+   - **GitHub**: Check your GitHub repository (`mrhavens/mirror-repo`).
+   - **Forgejo**: Check `http://localhost:3000/mrhavens/mirror-repo`.
+   - **Internet Archive**: Check `fold-stack-git-mirror` for Git bundles.
+   - **Web3.storage**: Enable in `remotes.conf` and check `fold-stack-git-mirror`.
+
+**Configuration**:
+- Edit `config/git-sync/.env` to adjust settings:
+  \`\`\`
+  SYNC_INTERVAL=300  # Sync check interval in seconds
+  PUSH_MODE=push     # "push" for git push, "bundle" for git bundle
+  SIGN_COMMITS=false # Set to true to enable commit signing (requires GPG)
+  LOG_LEVEL=INFO     # Log verbosity (INFO, ERROR)
+  RETRY_MAX=3        # Max retry attempts for failed syncs
+  RETRY_BACKOFF=5    # Base backoff time in seconds for retries
+  \`\`\`
+
+**Logs**:
+- Logs are stored in `./volumes/logs` with filenames like `sync-<timestamp>.log`.
+
+---
+
 ## 🛠️ Troubleshooting
 
 ### General Issues
@@ -419,6 +503,14 @@ docker compose -f docker-compose.dev.yml stop overleaf overleaf-mongo overleaf-r
   \`\`\`
   Ensure MongoDB and Redis are healthy before Overleaf starts (handled by `depends_on` in `docker-compose.dev.yml`).
 
+### Git-Sync Issues
+- **Sync Fails**: Check logs:
+  \`\`\`bash
+  docker logs git_sync_dev
+  \`\`\`
+  Ensure SSH keys are correctly set up and remotes are accessible.
+- **Radicle Not Syncing**: Radicle sync is a placeholder. Implement the `rad` CLI in `entrypoint.sh` if needed.
+
 ---
 
 ## 📚 Additional Resources
@@ -451,6 +543,6 @@ Contributions are welcome! To contribute:
 
 ## 📅 Last Updated
 
-This README was last updated on **May 26, 2025, at 08:49 PM CDT**.
+This README was last updated on **May 26, 2025, at 09:21 PM CDT**.
 
 ---

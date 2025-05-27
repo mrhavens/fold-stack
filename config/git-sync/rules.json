@@ -1,0 +1,4 @@
+{
+  "branches": ["*"],
+  "exclude_tags": []
+}
