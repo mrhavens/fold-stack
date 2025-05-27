@@ -63,8 +63,8 @@ services:
     image: mailhog/mailhog:latest
     container_name: mailhog_dev
     ports:
-      - "1025:1025"  # SMTP port
-      - "8025:8025"  # Web UI port
+      - "1025:1025"
+      - "8025:8025"
     networks:
       - fold-network
 
@@ -76,6 +76,11 @@ services:
     volumes:
       - ./volumes/trilium:/home/node/trilium-data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health-check"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - fold-network
 
@@ -90,8 +95,14 @@ services:
       - CMD_DOMAIN=localhost:3030
       - CMD_PROTOCOL_USESSL=false
       - CMD_DB_URL=sqlite:/hedgedoc/public/uploads/hedgedoc.db
+      - CMD_SESSION_SECRET=your-secret-here
     user: "1000:1000"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/_health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - fold-network
 
@@ -112,6 +123,11 @@ services:
       - NEXTCLOUD_ADMIN_PASSWORD=admin_password
       - NEXTCLOUD_TRUSTED_DOMAINS=localhost
       - NEXTCLOUD_DEFAULT_LANGUAGE=en
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/status.php"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
     networks:
       - fold-network
@@ -207,14 +223,13 @@ services:
       - "5005:5005"
     volumes:
       - ./volumes/flame:/app/data
-      - ./.env.dev:/app/.env:ro
     environment:
       - FLAME_PASSWORD=${FLAME_PASSWORD}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5005/health"]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
     cap_drop:
       - ALL
     cap_add:
@@ -234,12 +249,23 @@ services:
       - ./nginx/dev/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./volumes/logs:/var/log/nginx
     depends_on:
-      - ghost
-      - forgejo
-      - flame_dashboard
-      - trilium
-      - hedgedoc
-      - nextcloud
+      flame_dashboard:
+        condition: service_healthy
+      ghost:
+        condition: service_started
+      forgejo:
+        condition: service_started
+      trilium:
+        condition: service_healthy
+      hedgedoc:
+        condition: service_healthy
+      nextcloud:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - fold-network
     restart: unless-stopped
