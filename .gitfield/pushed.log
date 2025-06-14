@@ -27,3 +27,7 @@
   Diff Summary:
      .gitfield/gitlab.sigil.md | 59 +++++++++++++++++++++++++++++++++++++++++++++++
      1 file changed, 59 insertions(+)
+[2025-06-14T01:27:21Z] Bitbucket: https://bitbucket.org/thefoldwithin/fold-stack, Branch=main, Commit=25fcf60
+  Diff Summary:
+     .gitfield/bitbucket.sigil.md | 59 ++++++++++++++++++++++++++++++++++++++++++++
+     1 file changed, 59 insertions(+)
