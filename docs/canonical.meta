@@ -1,0 +1,23 @@
+{
+  "canonical_url": "https://remember.thefoldwithin.earth/mrhavens/fold-stack",
+  "mirrors": [
+    "https://github.com/mrhavens/fold-stack",
+    "https://gitlab.com/mrhavens/fold-stack",
+    "https://bitbucket.org/thefoldwithin/fold-stack",
+    "https://remember.thefoldwithin.earth/mrhavens/fold-stack",
+    "https://codeberg.org/mrhavens/fold-stack",
+    "https://gitea.com/mrhavens/fold-stack",
+    "rad:z3FEj7rF8gZw9eFksCuiN43qjzrex"
+  ],
+  "radicle": {
+    "rid": "rad:z3FEj7rF8gZw9eFksCuiN43qjzrex",
+    "peer_id": "z6Mkw5s3ppo26C7y7tGK5MD8n2GqTHS582PPpeX5Xqbu2Mpz"
+  },
+  "timestamp": "2025-06-14T01:20:35Z",
+  "commit": "25fcf60",
+  "tree_hash": "edf6588e2fc0c9d4040be4c0ce87a01f3c90a715",
+  "synced_cycles": 0,
+  "gpg_signatures": [
+
+  ]
+}
