@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
 
-echo "Starting fold-stack development environment (excluding Overleaf CE by default)..."
-docker compose --env-file .env.dev -f docker-compose.dev.yml up -d --build ghost forgejo radicle pandoc mailhog trilium hedgedoc nextcloud rclone typst git-sync flame_dashboard nginx
-echo "Core services started. To enable Overleaf CE, run: ./scripts/enable-overleaf.sh"
+echo "Starting fold-stack development environment..."
+docker compose --env-file .env.dev -f docker-compose.dev.yml up -d --build ghost forgejo radicle pandoc mailhog hedgedoc rclone typst git-sync
+echo "Core services started."
