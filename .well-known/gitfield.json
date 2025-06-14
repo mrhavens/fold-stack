@@ -1,0 +1,24 @@
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "fold-stack",
+  "url": "https://remember.thefoldwithin.earth/mrhavens/fold-stack",
+  "codeRepository": "https://remember.thefoldwithin.earth/mrhavens/fold-stack",
+  "sameAs": [
+    "https://github.com/mrhavens/fold-stack",
+    "https://gitlab.com/mrhavens/fold-stack",
+    "https://bitbucket.org/thefoldwithin/fold-stack",
+    "https://remember.thefoldwithin.earth/mrhavens/fold-stack",
+    "https://codeberg.org/mrhavens/fold-stack",
+    "https://gitea.com/mrhavens/fold-stack",
+    "rad:z3FEj7rF8gZw9eFksCuiN43qjzrex"
+  ],
+  "dateModified": "2025-06-14T01:20:35Z",
+  "publisher": {
+    "@type": "Person",
+    "name": "Mark Randall Havens"
+  },
+  "gpg_signatures": [
+
+  ]
+}
